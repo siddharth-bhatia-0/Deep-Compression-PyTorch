@@ -6,6 +6,10 @@ from torch.nn import Parameter
 from torch.nn.modules.module import Module
 import torch.nn.functional as F
 from torchvision import datasets, transforms
+import vgg
+import torchvision
+
+data_root = '/newvolume/data/image-classification/CIFAR10/'
 
 def log(filename, content):
     with open(filename, 'a') as f:
@@ -37,14 +41,40 @@ def print_nonzeros(model):
 
 
 def test(model, use_cuda=True):
+    
     kwargs = {'num_workers': 5, 'pin_memory': True} if use_cuda else {}
     device = torch.device("cuda" if use_cuda else 'cpu')
+    # test_loader = torch.utils.data.DataLoader(
+    # datasets.MNIST('data', train=False, transform=transforms.Compose([
+    #                    transforms.ToTensor(),
+    #                    transforms.Normalize((0.1307,), (0.3081,))
+    #                ])),
+    # batch_size=1000, shuffle=False, **kwargs)
+
+
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                     std=[0.229, 0.224, 0.225])
+
+    # train_loader = torch.utils.data.DataLoader(
+    #     torchvision.datasets.CIFAR10(root=data_root, train=True, transform=transforms.Compose([
+    #         transforms.RandomHorizontalFlip(),
+    #         transforms.RandomCrop(32, 4),
+    #         transforms.ToTensor(),
+    #         normalize,
+    #     ]), download=False),
+    #     batch_size=batch_size, shuffle=True,
+    #     num_workers=os.cpu_count(), pin_memory=True)
+
+
     test_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('data', train=False, transform=transforms.Compose([
-                       transforms.ToTensor(),
-                       transforms.Normalize((0.1307,), (0.3081,))
-                   ])),
-    batch_size=1000, shuffle=False, **kwargs)
+        torchvision.datasets.CIFAR10(root=data_root, train=False, transform=transforms.Compose([
+            transforms.ToTensor(),
+            normalize,
+        ])),
+        batch_size=512, shuffle=False,
+        num_workers=os.cpu_count(), pin_memory=True)
+
+
     model.eval()
     test_loss = 0
     correct = 0
