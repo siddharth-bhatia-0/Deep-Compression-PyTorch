@@ -19,6 +19,9 @@ class VGG(nn.Module):
     def __init__(self, features):
         super(VGG, self).__init__()
         self.features = features
+
+        self.reshaper = Reshaper()
+
         self.classifier = nn.Sequential(
             nn.Dropout(),
             nn.Linear(512, 512),
@@ -28,6 +31,10 @@ class VGG(nn.Module):
             nn.ReLU(True),
             nn.Linear(512, 10),
         )
+
+
+
+
          # Initialize weights
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -38,9 +45,20 @@ class VGG(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
-        x = x.view(x.size(0), -1)
+        # x = x.view(x.size(0), -1)
+        x = self.reshaper(x)
         x = self.classifier(x)
         return x
+
+
+class Reshaper(nn.Module):
+    """docstring for Reshaper"""
+    def __init__(self):
+        super(Reshaper, self).__init__()
+        
+    def forward(self, x):
+        return x.view(x.size(0), -1)
+        
 
 
 def make_layers(cfg, batch_norm=False):
@@ -56,6 +74,8 @@ def make_layers(cfg, batch_norm=False):
             else:
                 layers += [conv2d, nn.ReLU(inplace=True)]
             in_channels = v
+
+
     return nn.Sequential(*layers)
 
 
