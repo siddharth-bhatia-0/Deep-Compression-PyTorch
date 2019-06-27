@@ -42,7 +42,7 @@ def print_nonzeros(model):
 
 def test(model, use_cuda=True):
     
-    kwargs = {'num_workers': 5, 'pin_memory': True} if use_cuda else {}
+    kwargs = {'num_workers': os.cpu_count(), 'pin_memory': True} if use_cuda else {}
     device = torch.device("cuda" if use_cuda else 'cpu')
     # test_loader = torch.utils.data.DataLoader(
     # datasets.MNIST('data', train=False, transform=transforms.Compose([
@@ -80,6 +80,7 @@ def test(model, use_cuda=True):
     correct = 0
     with torch.no_grad():
         for data, target in test_loader:
+
             data, target = data.to(device), target.to(device)
             output = model(data)
             test_loss += F.nll_loss(output, target, reduction='sum').item() # sum up batch loss
